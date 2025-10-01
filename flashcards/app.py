@@ -24,70 +24,70 @@ def sanitize_key(k: str) -> str:
 GOOGLE_API_KEY = sanitize_key(os.getenv('GOOGLE_API_KEY'))
 print("[DEBUG] Checking for API key...")
 if not GOOGLE_API_KEY:
-    print("[DEBUG] API key not found in environment variables")
-    GOOGLE_API_KEY = input("Please enter your Google API key: ").strip()
-    if not GOOGLE_API_KEY:
-        raise ValueError("Google API key is required. Please set GOOGLE_API_KEY in .env file or enter a valid key.")
+    print("[DEBUG] API key not found in environment variables; running in locked mode until key is provided via web UI")
 
-try:
-    # Configure the Gemini API
-    genai.configure(api_key=GOOGLE_API_KEY)
+# Helper: preferred candidates in order (common variants across versions)
+candidates = [
+    'gemini-pro',
+    'gemini-1.0-pro',
+    'gemini-1.0',
+    'gemini',
+    'text-bison',
+    'chat-bison',
+]
 
-    # Discover available models and pick a suitable text/generative model
-    available_models = genai.list_models()
-    model_names = [m.name for m in available_models]
-    print("[DEBUG] Available models:", model_names)
-
-    # Preferred candidates in order (common variants across versions)
-    candidates = [
-        'gemini-pro',
-        'gemini-1.0-pro',
-        'gemini-1.0',
-        'gemini',
-        'text-bison',
-        'chat-bison',
-    ]
-
-    chosen = None
-    def pick_model(names):
-        # prefer known generative candidates
-        for c in candidates:
-            for name in names:
-                if c in name:
-                    return name
-        # otherwise pick first non-embedding model
+def pick_model(names):
+    # prefer known generative candidates
+    for c in candidates:
         for name in names:
-            ln = name.lower()
-            if 'embed' not in ln and 'embedding' not in ln and 'vector' not in ln:
+            if c in name:
                 return name
-        # fallback to first if nothing else
-        return names[0] if names else None
+    # otherwise pick first non-embedding model
+    for name in names:
+        ln = name.lower()
+        if 'embed' not in ln and 'embedding' not in ln and 'vector' not in ln:
+            return name
+    # fallback to first if nothing else
+    return names[0] if names else None
 
-    chosen = pick_model(model_names)
 
-    if not chosen:
-        raise Exception('No generative models available for this API key')
+if GOOGLE_API_KEY:
+    try:
+        # Configure the Gemini API
+        genai.configure(api_key=GOOGLE_API_KEY)
 
-    print(f"[DEBUG] Chosen model: {chosen}")
+        # Discover available models and pick a suitable text/generative model
+        available_models = genai.list_models()
+        model_names = [m.name for m in available_models]
+        print("[DEBUG] Available models:", model_names)
 
-    # Set up model configuration
-    generation_config = {
-        "temperature": 0.7,
-        "top_p": 1,
-        "top_k": 40,
-        "max_output_tokens": 1024,
-    }
+        chosen = pick_model(model_names)
 
-    # Initialize the model with chosen name
-    model = genai.GenerativeModel(model_name=chosen, generation_config=generation_config)
-    print("[DEBUG] Successfully initialized Gemini model")
-except Exception as e:
-    print(f"[DEBUG] Error configuring Gemini: {str(e)}")
-    # Mark Gemini as not ready and continue so the app can return a helpful error
-    GEMINI_READY = False
-    print("[DEBUG] Gemini initialization failed, continuing with GEMINI_READY=False")
+        if not chosen:
+            raise Exception('No generative models available for this API key')
+
+        print(f"[DEBUG] Chosen model: {chosen}")
+
+        # Set up model configuration
+        generation_config = {
+            "temperature": 0.7,
+            "top_p": 1,
+            "top_k": 40,
+            "max_output_tokens": 1024,
+        }
+
+        # Initialize the model with chosen name
+        model = genai.GenerativeModel(model_name=chosen, generation_config=generation_config)
+        print("[DEBUG] Successfully initialized Gemini model")
+    except Exception as e:
+        print(f"[DEBUG] Error configuring Gemini: {str(e)}")
+        # Mark Gemini as not ready and continue so the app can return a helpful error
+        GEMINI_READY = False
+        print("[DEBUG] Gemini initialization failed, continuing with GEMINI_READY=False")
+    else:
+        GEMINI_READY = True
 else:
-    GEMINI_READY = True
+    GEMINI_READY = False
 
 def is_gemini_ready():
     return GEMINI_READY
@@ -244,7 +244,8 @@ def generate_flashcards(topic, level):
 @app.route('/')
 def home():
     print("[DEBUG] Rendering home page")
-    return render_template('index.html')
+    # If no API key is configured, instruct frontend to open settings modal
+    return render_template('index.html', open_settings=(not bool(GOOGLE_API_KEY)))
 
 @app.route('/generate', methods=['POST'])
 def create_flashcards():

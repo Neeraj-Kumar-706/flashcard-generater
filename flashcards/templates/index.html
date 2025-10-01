@@ -38,10 +38,14 @@
         // Debug any card flip issues
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, scripts running');
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                // modal-overlay uses flex to center the modal
-                document.getElementById('settingsModal').style.display = 'flex';
-            });
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', () => {
+                    // modal-overlay uses flex to center the modal
+                    document.getElementById('settingsModal').style.display = 'flex';
+                });
+            }
+
             document.addEventListener('click', (e) => {
                 // close when clicking the close button or outside the modal
                 const overlay = document.getElementById('settingsModal');
@@ -50,6 +54,17 @@
                     overlay.style.display = 'none';
                 }
             });
+
+            // If backend requested opening settings (no API key), open modal automatically
+            try {
+                const openSettings = {{ 'true' if (open_settings|default(False)) else 'false' }};
+                if (openSettings === true || openSettings === 'true') {
+                    const overlay = document.getElementById('settingsModal');
+                    if (overlay) overlay.style.display = 'flex';
+                }
+            } catch (err) {
+                // ignore templating/rendering errors
+            }
         });
     </script>
     <!-- Settings Modal -->

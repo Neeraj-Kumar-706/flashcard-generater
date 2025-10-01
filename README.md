@@ -2,6 +2,9 @@
 
 A web application that generates flash cards using artificial intelligence, built with Flask backend and modern web technologies.
 
+![dark mode](screenshots/1.png)
+![default mode](screenshots/4.png)
+
 ## Features
 
 - AI-powered flash card generation using Google's Gemini API

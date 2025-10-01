@@ -25,6 +25,8 @@ git clone https://github.com/Neeraj-Kumar-706/flashcard-generater.git
 or just download the zip file
 
 2. setting up env
+
+navigate to dir "flashcard" 
 you should have python 3 installed on your system
 ```
 python -m venv env
@@ -35,13 +37,13 @@ python -m venv env
 ```
 3. installing library into env
 
-**activate the env for python then install the** lib use this cmd
+**activate the env for python then** install libs 
 ```
 pip install -r requirements.txt
 ```
 4. run the app.py
 
-use any terminal any run app.py
+use any terminal and navigate to dir "flashcard" inside that you will find app.py file run that file by cmd below
 ```
 python app.py
 ```

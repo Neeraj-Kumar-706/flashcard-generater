@@ -1,0 +1,4 @@
+Flask>=2.0
+python-dotenv>=1.0
+# Google Generative AI client (may be named google-generative-ai or google-generativeai depending on distribution)
+google-generativeai>=0.6

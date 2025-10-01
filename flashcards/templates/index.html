@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Flashcard Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Flashcard Generator </h1>
+        <h4>By Team White Falcons</h4>
+        
+        <div class="input-form">
+            <input type="text" id="topic" placeholder="Enter your topic" required>
+            <select id="level">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+            <button onclick="generateCards()">Generate Flashcards</button>
+            <!-- theme selector moved to sit directly left of the Settings button -->
+            <select id="themeSelect" title="Theme" aria-label="Theme selector">
+                <option value="default">Default (Blue)</option>
+                <option value="dark">Dark</option>
+                <option value="green">Green</option>
+                <option value="solar">Solar</option>
+            </select>
+            <button id="settingsBtn" class="settings-button">Settings</button>
+        </div>
+
+        <div id="flashcards-container">
+            <!-- Flashcards will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Debug any card flip issues
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, scripts running');
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                // modal-overlay uses flex to center the modal
+                document.getElementById('settingsModal').style.display = 'flex';
+            });
+            document.addEventListener('click', (e) => {
+                // close when clicking the close button or outside the modal
+                const overlay = document.getElementById('settingsModal');
+                if (!overlay) return;
+                if (e.target && (e.target.id === 'closeSettings' || e.target === overlay)) {
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <h2>Settings</h2>
+            <div class="field">
+                <label for="apiKeyInput">Google Gemini API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="Enter your GOOGLE_API_KEY">
+            </div>
+            <div id="settingsMsg"></div>
+            <div class="actions">
+                <button id="closeSettings" class="btn-secondary">Close</button>
+                <button id="saveApiKey">Save API Key</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

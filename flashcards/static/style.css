@@ -1,0 +1,365 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* Theme variables (default palette) */
+:root {
+    --bg: #ffffff;
+    --text: #111827;
+    --primary: #2196F3; /* blue */
+    --primary-contrast: #ffffff;
+    --muted: #f5f5f5;
+    --card-bg: #ffffff;
+    --card-back-bg: var(--primary);
+    --card-back-text: var(--primary-contrast);
+    --primary-hover: #1976D2;
+    --muted-border: #dddddd;
+}
+
+/* Theme presets */
+.theme-dark {
+    --bg: #0f1724;
+    --text: #e6eef6;
+    --primary: #1e90ff;
+    --primary-contrast: #ffffff;
+    --muted: #0b1220;
+    --card-bg: #071025;
+    --card-back-bg: var(--primary);
+    --card-back-text: var(--primary-contrast);
+    --primary-hover: #1777d9;
+    --muted-border: #1e293b;
+}
+.theme-green {
+    --bg: #f3fbf6;
+    --text: #052b18;
+    --primary: #16a34a;
+    --primary-contrast: #ffffff;
+    --muted: #e6f6ea;
+    --card-bg: #ffffff;
+    --card-back-bg: var(--primary);
+    --card-back-text: var(--primary-contrast);
+    --primary-hover: #13883b;
+    --muted-border: #d6ead6;
+}
+.theme-solar {
+    --bg: #fffaf0;
+    --text: #2b2b1f;
+    --primary: #f59e0b;
+    --primary-contrast: #1b1b12;
+    --muted: #fff3db;
+    --card-bg: #ffffff;
+    --card-back-bg: var(--primary);
+    --card-back-text: var(--primary-contrast);
+    --primary-hover: #d68600;
+    --muted-border: #f1d8a3;
+}
+
+/* Apply base page colors */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* make sizing more predictable */
+*, *:before, *:after { box-sizing: border-box; }
+
+.input-form {
+    margin: 20px 0;
+    text-align: center;
+    padding: 20px;
+    background: var(--muted);
+    border-radius: 8px;
+}
+
+#topic {
+    padding: 12px;
+    width: 300px;
+    margin-right: 10px;
+    border: 2px solid var(--muted-border);
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#level {
+    padding: 12px;
+    margin-right: 10px;
+    border: 2px solid var(--muted-border);
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    padding: 12px 24px;
+    background-color: var(--primary);
+    color: var(--primary-contrast);
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+}
+
+.flashcard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+    align-items: start; /* keep grid items aligned to top so expanded cards push content down instead of overlapping */
+    grid-auto-rows: 1fr; /* allow cards to stretch to a uniform row height when possible */
+}
+
+.flashcard {
+    background-color: transparent;
+    width: 100%;
+    /* make unrevealed cards larger so long questions can be shown without clipping */
+    min-height: 260px; /* base height when unrevealed */
+    max-height: 380px; /* keep unrevealed cards uniform but larger */
+    perspective: 1000px;
+    margin-bottom: 20px;
+    overflow: hidden; /* hide overflow until expanded */
+    transition: max-height 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex; /* allow content centering */
+    align-items: center; /* vertically center question in unrevealed state */
+
+}
+
+.card-inner {
+    /* Use grid so front/back can overlap but still contribute to container height */
+    display: grid;
+    width: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+/* When a card is flipped, allow it to grow to fit content */
+.flashcard.flipped {
+    max-height: 1000px; /* large enough for long answers; keeps transition animating */
+}
+
+.flashcard.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    /* Stack both faces in the same grid cell so the container height equals the taller face */
+    grid-area: 1 / 1;
+    position: relative; /* allow absolutely positioned children like .card-number */
+    width: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    /* keep front centered, but allow back content to start at the top when expanded */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Front side styling */
+.card-front {
+    background-color: var(--card-bg);
+    /* subtle border in unrevealed state so tiles read as wallpaper */
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+    z-index: 2;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Optional stacked layout: add 'layout-stack' to body to force single-column top-to-bottom flow */
+body.layout-stack .flashcard-grid {
+    grid-template-columns: 1fr;
+}
+
+/* Back side styling */
+.card-back {
+    background-color: var(--card-back-bg);
+    color: var(--card-back-text);
+    transform: rotateY(180deg);
+    z-index: 1;
+    border: 2px solid var(--primary);
+}
+
+/* When expanded prefer top-aligned content on the back side */
+.flashcard.flipped .card-back {
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+/* When card is flipped, make the front border use primary color so the tile 'reveals' */
+.flashcard.flipped .card-front {
+    border-color: var(--primary);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* Remove duplicate hardcoded front/back definitions (now using variables above) */
+
+.question-text {
+    /* show full question by default and wrap; increased tile size ensures it fits neatly */
+    font-size: clamp(15px, 1.6vw, 20px);
+    margin: 10px 12px;
+    padding: 8px 12px;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: normal; /* allow wrapping */
+    word-break: break-word;
+}
+
+.answer-text {
+    font-size: 16px;
+    margin: 10px;
+    padding: 15px;
+    width: 90%;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.answer-text h3 {
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.answer-text p {
+    margin: 0;
+    padding: 0;
+}
+
+.card-number {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: var(--primary);
+    color: var(--primary-contrast);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flip-hint {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.card-back .flip-hint {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #666;
+}
+
+.error {
+    text-align: center;
+    padding: 20px;
+    color: #f44336;
+    font-size: 16px;
+}
+
+/* Settings modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none; /* toggled via JS */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal {
+    background: #fff;
+    width: 420px;
+    max-width: calc(100% - 40px);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    padding: 20px;
+}
+
+.modal h2 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+}
+
+.modal .field {
+    margin-bottom: 12px;
+}
+
+.modal .field {
+    padding-left: 8px; /* nudge input a bit to the right so it sits inside the box */
+    padding-right: 8px;
+}
+
+.modal label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.modal input[type="text"],
+.modal input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box; /* ensure width includes padding and doesn't overflow */
+}
+
+.modal .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.btn-secondary {
+    background-color: #eee;
+    color: #333;
+}
+
+.btn-danger {
+    background-color: #f44336;
+}
+
+.settings-button {
+    margin-left: 12px;
+    background-color: #6c757d;
+}
+
+/* Theme selector styling */
+#themeSelect {
+    padding: 10px 12px;
+    margin-left: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* small responsive tweak for flashcard grid spacing when modal is visible */
+@media (max-width: 480px) {
+    .flashcard-grid { grid-template-columns: 1fr; }
+}

@@ -145,12 +145,6 @@ def generate_flashcards(topic, level):
         Follow these requirements carefully:
         1. Create exactly 6 unique flashcards
         2. Each card must focus on a different aspect:
-           - Basic definition
-           - Core concepts
-           - Practical applications
-           - Examples or use cases
-           - Common misconceptions
-           - Advanced insights
         3. Match {level} level complexity
         4. Questions must be clear and specific
         5. Answers must be 2-3 sentences, informative but concise
